@@ -1,12 +1,18 @@
 using UnityEngine;
-
+using System;
+public enum CategoryType
+{
+    Gaming,
+    Exercise,
+    Eating
+}
 public class UIEventBus : MonoBehaviour
 {   
     /// <summary>
     /// Triggered when a category (e.g., "Gaming", "Exercise", "Eating") is selected.
-    /// Parameter: string categoryName
+    /// Parameter: CategoryType category
     /// </summary>
-    public static Action<string> CategorySelected;
+    public static Action<CategoryType> CategorySelected;
 
     /// <summary>
     /// Triggered when a record is submitted by the user.
