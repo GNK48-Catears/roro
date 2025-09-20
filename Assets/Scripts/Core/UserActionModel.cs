@@ -17,17 +17,29 @@ public class UserActionModel : MonoBehaviour
     {
         GamingData data = new GamingData { type = ntype, time = ntime };
         _gamingRepo.Add(data);
+        float currentScore = PersistentDataModel.ReadScore();
+        float addScore = RewardSystem.GetGamingReward(data);
+        PersistentDataModel.SaveNewScore(currentScore + addScore);
+        FunctionEventBus.UserScoreAdded?.Invoke(addScore);
     }
 
     public void AddEatingData(MealType nMeal = MealType.Dinner, FoodType nFood = FoodType.Fuel)
     {
         EatingData data = new EatingData { meal = nMeal, food = nFood };
         _eatingRepo.Add(data);
+        float currentScore = PersistentDataModel.ReadScore();
+        float addScore = RewardSystem.GetEatingReward(data);
+        PersistentDataModel.SaveNewScore(currentScore + addScore);
+        FunctionEventBus.UserScoreAdded?.Invoke(addScore);
     }
 
     public void AddExerciseData(ExerciseType nType = ExerciseType.FNM, int nTime = 0)
     {
         ExerciseData data = new ExerciseData { type = ExerciseType.Cardio, time = 0 };
         _exerciseRepo.Add(data);
+        float currentScore = PersistentDataModel.ReadScore();
+        float addScore = RewardSystem.GetExerciseReward(data);
+        PersistentDataModel.SaveNewScore(currentScore + addScore);
+        FunctionEventBus.UserScoreAdded?.Invoke(addScore);
     }
 }
