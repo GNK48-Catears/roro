@@ -6,7 +6,6 @@ using UnityEngine;
 /// </summary>
 public static class PersistentDataModel
 {
-    public static event Action<float> UserScoreUpdated;
     public static readonly string SCORE_KEY = "user:score";
     // TODO: we need a proper data storing/accessing method
     public static void SaveNewScore(float score)
