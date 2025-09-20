@@ -66,9 +66,13 @@ public class UIController : MonoBehaviour
     void OnCategoryButtonClicked(CategoryType category)
     {
         currentCategory = category;
-        gamingPanel.SetActive(category == CategoryType.Gaming);
-        exercisePanel.SetActive(category == CategoryType.Exercise);
-        eatingPanel.SetActive(category == CategoryType.Eating);
+        ShowPanel(category switch
+        {
+            CategoryType.Gaming => gamingPanel,
+            CategoryType.Exercise => exercisePanel,
+            CategoryType.Eating => eatingPanel,
+            _ => selectCategoryPanel
+        });
         confirmButton.gameObject.SetActive(true);
     }
 
@@ -156,8 +160,8 @@ public class UIController : MonoBehaviour
 
         panel.SetActive(true);
 
-        if (panel != gamingPanel && panel != exercisePanel && panel != eatingPanel)
-            confirmButton.gameObject.SetActive(false);
+        if (panel == gamingPanel || panel == exercisePanel || panel == eatingPanel)
+            confirmButton.gameObject.SetActive(true);
     }
 
     private void SetScoreEarned(float score)
