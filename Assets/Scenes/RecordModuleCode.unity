@@ -411,6 +411,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 263c6c21768cd444482aa2f1c93980d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ReportSignalHandler
+  actionModel: {fileID: 0}
 --- !u!4 &984196036
 Transform:
   m_ObjectHideFlags: 0
