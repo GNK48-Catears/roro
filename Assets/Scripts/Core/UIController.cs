@@ -1,41 +1,55 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using TMPro;
 
-public class RecordInputPanelController : MonoBehaviour
-{   
+public class UIController : MonoBehaviour
+{
     [Header("Panels")]
-    public GameObject gamingPanel;
-    public GameObject exercisePanel;
-    public GameObject eatingPanel;
+    [SerializeField] private GameObject startPanel;
+    [SerializeField] private GameObject selectCategoryPanel;
+    [SerializeField] private GameObject gamingPanel;
+    [SerializeField] private GameObject exercisePanel;
+    [SerializeField] private GameObject eatingPanel;
+    [Header("Result Panel")]
+    [SerializeField] private GameObject resultPanel;
+    [SerializeField] private TextMeshProUGUI scoreEarnedText;
+    [SerializeField] private TextMeshProUGUI totalScoreText;
+    [SerializeField] private Button closeButton;
 
     [Header("Category Buttons")]
-    public Button gamingButton;
-    public Button exerciseButton;
-    public Button eatingButton;
-    public Button confirmButton;
+    [SerializeField] private Button gamingButton;
+    [SerializeField] private Button exerciseButton;
+    [SerializeField] private Button eatingButton;
+    [SerializeField] private Button confirmButton;
 
     private CategoryType currentCategory;
 
     [Header("Gaming Settings")]
-    public Dropdown gamingTypeDropdown;
-    public InputField gamingTimeInput;
+    private TMP_Dropdown gamingTypeDropdown;
+    private TMP_InputField gamingTimeInput;
 
     [Header("Exercise Settings")]
-    public Dropdown exerciseTypeDropdown;
-    public InputField exerciseTimeInput;
+    private TMP_Dropdown exerciseTypeDropdown;
+    private TMP_InputField exerciseTimeInput;
 
     [Header("Eating Settings")]
-    public Dropdown mealTypeDropdown;
-    public Dropdown foodTypeDropdown;
+    private TMP_Dropdown mealTypeDropdown;
+    private TMP_Dropdown foodTypeDropdown;
 
+    void Awake()
+    {
+        Setup();
+    }
     void OnEnable()
     {
         gamingButton.onClick.AddListener(() => OnCategoryButtonClicked(CategoryType.Gaming));
         exerciseButton.onClick.AddListener(() => OnCategoryButtonClicked(CategoryType.Exercise));
         eatingButton.onClick.AddListener(() => OnCategoryButtonClicked(CategoryType.Eating));
-        UIEventBus.CategorySelected += OnCategorySelected;
         confirmButton.onClick.AddListener(OnConfirmClicked);
+        closeButton.onClick.AddListener(Reset);
+        FunctionEventBus.UserScoreAdded += (score) => SetScoreEarned(score);
+        FunctionEventBus.UserScoreUpdated += (score) => SetTotalScore(score);
     }
 
     void OnDisable()
@@ -43,53 +57,119 @@ public class RecordInputPanelController : MonoBehaviour
         gamingButton.onClick.RemoveAllListeners();
         exerciseButton.onClick.RemoveAllListeners();
         eatingButton.onClick.RemoveAllListeners();
-        UIEventBus.CategorySelected -= OnCategorySelected;
         confirmButton.onClick.RemoveListener(OnConfirmClicked);
+        closeButton.onClick.RemoveListener(Reset);
+        FunctionEventBus.UserScoreAdded -= (score) => SetScoreEarned(score);
+        FunctionEventBus.UserScoreUpdated -= (score) => SetTotalScore(score);
     }
-
-    void OnCategorySelected(CategoryType category)
+    
+    void OnCategoryButtonClicked(CategoryType category)
     {
         currentCategory = category;
         gamingPanel.SetActive(category == CategoryType.Gaming);
         exercisePanel.SetActive(category == CategoryType.Exercise);
         eatingPanel.SetActive(category == CategoryType.Eating);
+        confirmButton.gameObject.SetActive(true);
     }
 
-    void OnCategoryButtonClicked(CategoryType category)
+    void OnConfirmClicked()
     {
-        UIEventBus.CategorySelected?.Invoke(category);
+        object recordData = null;
+        switch (currentCategory)
+        {
+            case CategoryType.Gaming:
+                recordData = new GamingData
+                {
+                    type = gamingTypeDropdown.options[gamingTypeDropdown.value].text,
+                    time = int.TryParse(gamingTimeInput.text, out int gTime) ? gTime : 0
+                };
+                break;
+            case CategoryType.Exercise:
+                recordData = new ExerciseData
+                {
+                    type = (ExerciseType)exerciseTypeDropdown.value,
+                    time = int.TryParse(exerciseTimeInput.text, out int eTime) ? eTime : 0
+                };
+                break;
+            case CategoryType.Eating:
+                recordData = new EatingData
+                {
+                    meal = (MealType)mealTypeDropdown.value,
+                    food = (FoodType)foodTypeDropdown.value
+                };
+                break;
+        }
+        if (recordData != null)
+        {
+            UIEventBus.RecordSubmitted?.Invoke(recordData);
+            ShowPanel(resultPanel);
+        }
     }
 
-void OnConfirmClicked()
-{
-    object recordData = null;
-    switch (currentCategory)
+    public void Setup()
     {
-        case CategoryType.Gaming:
-            recordData = new GamingData
-            {
-                type = gamingTypeDropdown.options[gamingTypeDropdown.value].text,
-                time = int.TryParse(gamingTimeInput.text, out int gTime) ? gTime : 0
-            };
-            break;
-        case CategoryType.Exercise:
-            recordData = new ExerciseData
-            {
-                type = (ExerciseType)exerciseTypeDropdown.value,
-                time = int.TryParse(exerciseTimeInput.text, out int eTime) ? eTime : 0
-            };
-            break;
-        case CategoryType.Eating:
-            recordData = new EatingData
-            {
-                meal = (MealType)mealTypeDropdown.value,
-                food = (FoodType)foodTypeDropdown.value
-            };
-            break;
+        // Gaming
+        if (gamingPanel != null)
+        {
+            gamingTypeDropdown = gamingPanel.transform.GetChild(0).GetComponent<TMP_Dropdown>();
+            gamingTimeInput = gamingPanel.transform.GetChild(1).GetComponent<TMP_InputField>();
+        }
+        // Exercise
+        if (exercisePanel != null)
+        {
+            exerciseTypeDropdown = exercisePanel.transform.GetChild(0).GetComponent<TMP_Dropdown>();
+            exerciseTimeInput = exercisePanel.transform.GetChild(1).GetComponent<TMP_InputField>();
+        }
+        // Eating
+        if (eatingPanel != null)
+        {
+            mealTypeDropdown = eatingPanel.transform.GetChild(0).GetComponent<TMP_Dropdown>();
+            foodTypeDropdown = eatingPanel.transform.GetChild(1).GetComponent<TMP_Dropdown>();
+        }
+
+        DropDownEnumBinder.BindEnumToDropdown<MealType>(mealTypeDropdown);
+        DropDownEnumBinder.BindEnumToDropdown<FoodType>(foodTypeDropdown);
+        DropDownEnumBinder.BindEnumToDropdown<ExerciseType>(exerciseTypeDropdown);
+        Reset();
     }
-    if (recordData != null)
+
+    private void Reset()
     {
-        UIEventBus.RecordSubmitted?.Invoke(recordData);
+        gamingTypeDropdown.value = 0;
+        gamingTimeInput.text = "";
+        exerciseTypeDropdown.value = 0;
+        exerciseTimeInput.text = "";
+        mealTypeDropdown.value = 0;
+        foodTypeDropdown.value = 0;
+        ShowPanel(startPanel);
+        confirmButton.gameObject.SetActive(false);
     }
-}
+
+    private void ShowPanel(GameObject panel)
+    {
+        startPanel.SetActive(false);
+        selectCategoryPanel.SetActive(false);
+        gamingPanel.SetActive(false);
+        exercisePanel.SetActive(false);
+        eatingPanel.SetActive(false);
+        resultPanel.SetActive(false);
+
+        panel.SetActive(true);
+
+        if (panel != gamingPanel && panel != exercisePanel && panel != eatingPanel)
+            confirmButton.gameObject.SetActive(false);
+    }
+
+    private void SetScoreEarned(float score)
+    {
+        if (scoreEarnedText != null)
+            scoreEarnedText.text = $"Score Earned: {score}";
+    }
+
+    private void SetTotalScore(float score)
+    {
+        if (totalScoreText != null)
+            totalScoreText.text = $"Total Score: {score}";
+    }
+
 }
