@@ -7,10 +7,16 @@ public class UIController : MonoBehaviour
 {
     [Header("Panels")]
     [SerializeField] private GameObject startPanel;
+    [SerializeField] private GameObject subPanel;
     [SerializeField] private GameObject selectCategoryPanel;
     [SerializeField] private GameObject gamingPanel;
     [SerializeField] private GameObject exercisePanel;
     [SerializeField] private GameObject eatingPanel;
+
+    [Header("Start Panel")]
+    [SerializeField] private Button plusButton;
+    [SerializeField] private TextMeshProUGUI totalScoreTextStart;
+
     [Header("Result Panel")]
     [SerializeField] private GameObject resultPanel;
     [SerializeField] private TextMeshProUGUI scoreEarnedText;
@@ -42,14 +48,19 @@ public class UIController : MonoBehaviour
         Setup();
     }
     void OnEnable()
-    {
+    {   
+        plusButton.onClick.AddListener(() => {PlanetAnim.Instance.FirstClick(); HideAllPanels(); AudioManager.Instance.PlayOneShot("pew", 0.5f); });
         gamingButton.onClick.AddListener(() => OnCategoryButtonClicked(CategoryType.Gaming));
         exerciseButton.onClick.AddListener(() => OnCategoryButtonClicked(CategoryType.Exercise));
         eatingButton.onClick.AddListener(() => OnCategoryButtonClicked(CategoryType.Eating));
         confirmButton.onClick.AddListener(OnConfirmClicked);
-        closeButton.onClick.AddListener(Reset);
+        closeButton.onClick.AddListener(() => {PlanetAnim.Instance.FinishReport(); HideAllPanels();});
         FunctionEventBus.UserScoreAdded += (score) => SetScoreEarned(score);
         FunctionEventBus.UserScoreUpdated += (score) => SetTotalScore(score);
+
+        if (PlanetAnim.Instance != null)
+            PlanetAnim.Instance.OnPlusClickComplete += () => { ShowPanel(selectCategoryPanel); };
+            PlanetAnim.Instance.OnReportFinish += () => { Reset(); };
     }
 
     void OnDisable()
@@ -66,10 +77,15 @@ public class UIController : MonoBehaviour
     void OnCategoryButtonClicked(CategoryType category)
     {
         currentCategory = category;
-        gamingPanel.SetActive(category == CategoryType.Gaming);
-        exercisePanel.SetActive(category == CategoryType.Exercise);
-        eatingPanel.SetActive(category == CategoryType.Eating);
+        ShowPanel(category switch
+        {
+            CategoryType.Gaming => gamingPanel,
+            CategoryType.Exercise => exercisePanel,
+            CategoryType.Eating => eatingPanel,
+            _ => selectCategoryPanel
+        });
         confirmButton.gameObject.SetActive(true);
+        AudioManager.Instance.PlayOneShot("pew", 0.5f);
     }
 
     void OnConfirmClicked()
@@ -102,7 +118,9 @@ public class UIController : MonoBehaviour
         if (recordData != null)
         {
             UIEventBus.RecordSubmitted?.Invoke(recordData);
+            confirmButton.gameObject.SetActive(false);
             ShowPanel(resultPanel);
+            AudioManager.Instance.PlayOneShot("rizz", 0.8f);
         }
     }
 
@@ -130,6 +148,8 @@ public class UIController : MonoBehaviour
         DropDownEnumBinder.BindEnumToDropdown<MealType>(mealTypeDropdown);
         DropDownEnumBinder.BindEnumToDropdown<FoodType>(foodTypeDropdown);
         DropDownEnumBinder.BindEnumToDropdown<ExerciseType>(exerciseTypeDropdown);
+        if (subPanel != null)
+            subPanel.SetActive(true);
         Reset();
     }
 
@@ -156,8 +176,18 @@ public class UIController : MonoBehaviour
 
         panel.SetActive(true);
 
-        if (panel != gamingPanel && panel != exercisePanel && panel != eatingPanel)
-            confirmButton.gameObject.SetActive(false);
+        if (panel == gamingPanel || panel == exercisePanel || panel == eatingPanel)
+            confirmButton.gameObject.SetActive(true);
+    }
+
+    private void HideAllPanels()
+    {
+        startPanel.SetActive(false);
+        selectCategoryPanel.SetActive(false);
+        gamingPanel.SetActive(false);
+        exercisePanel.SetActive(false);
+        eatingPanel.SetActive(false);
+        resultPanel.SetActive(false);
     }
 
     private void SetScoreEarned(float score)
@@ -170,6 +200,8 @@ public class UIController : MonoBehaviour
     {
         if (totalScoreText != null)
             totalScoreText.text = $"Total Score: {score}";
+        if (totalScoreTextStart != null)
+            totalScoreTextStart.text = $"Total Score: {score}";
     }
 
 }
