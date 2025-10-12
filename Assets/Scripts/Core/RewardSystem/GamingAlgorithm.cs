@@ -5,15 +5,17 @@
 /// </summary>
 public static class GamingAlgorithm
 {
-    private const float normalMultiplier = 1f;
-    private const float reducedMultiplier = 0.5f;
+    private const float _normalMultiplier = 1f;
+    private const float _reducedMultiplier = 0.5f;
 
     /// <summary>
     /// Note: when the time is over 1 hour, reduce the multiplier to 1
     /// </summary>
     /// <param name="data"></param>
     /// <returns></returns>
-    public static float CalculateScore(GamingData data)
+    public static float CalculateScore(GamingData data,
+        float normalMultiplier = _normalMultiplier,
+        float reducedMultiplier = _reducedMultiplier)
     {
         if (data == null)
         {

@@ -6,7 +6,7 @@ public class UserActionModel : MonoBehaviour
     [Inject] private JsonFileRepository<GamingData> _gamingRepo;
     [Inject] private JsonFileRepository<EatingData> _eatingRepo;
     [Inject] private JsonFileRepository<ExerciseData> _exerciseRepo;
-
+    [Inject] private IRewardSystem _rewardSystem;
     [SerializeField] private bool deleteDataOnLaunchMode = false;
 
     void Awake()
@@ -30,7 +30,7 @@ public class UserActionModel : MonoBehaviour
         GamingData data = new GamingData { type = ntype, time = ntime };
         _gamingRepo.Add(data);
         float currentScore = PersistentDataModel.ReadScore();
-        float addScore = RewardSystem.GetGamingReward(data);
+        float addScore = _rewardSystem.GetGamingReward(data);
         PersistentDataModel.SaveNewScore(currentScore + addScore);
         FunctionEventBus.UserScoreAdded?.Invoke(addScore);
     }
@@ -39,7 +39,7 @@ public class UserActionModel : MonoBehaviour
     {
         _gamingRepo.Add(data);
         float currentScore = PersistentDataModel.ReadScore();
-        float addScore = RewardSystem.GetGamingReward(data);
+        float addScore = _rewardSystem.GetGamingReward(data);
         PersistentDataModel.SaveNewScore(currentScore + addScore);
         FunctionEventBus.UserScoreAdded?.Invoke(addScore);
     }
@@ -49,7 +49,7 @@ public class UserActionModel : MonoBehaviour
         EatingData data = new EatingData { meal = nMeal, food = nFood };
         _eatingRepo.Add(data);
         float currentScore = PersistentDataModel.ReadScore();
-        float addScore = RewardSystem.GetEatingReward(data);
+        float addScore = _rewardSystem.GetEatingReward(data);
         PersistentDataModel.SaveNewScore(currentScore + addScore);
         FunctionEventBus.UserScoreAdded?.Invoke(addScore);
     }
@@ -57,7 +57,7 @@ public class UserActionModel : MonoBehaviour
     {
         _eatingRepo.Add(data);
         float currentScore = PersistentDataModel.ReadScore();
-        float addScore = RewardSystem.GetEatingReward(data);
+        float addScore = _rewardSystem.GetEatingReward(data);
         PersistentDataModel.SaveNewScore(currentScore + addScore);
         FunctionEventBus.UserScoreAdded?.Invoke(addScore);
     }
@@ -67,7 +67,7 @@ public class UserActionModel : MonoBehaviour
         ExerciseData data = new ExerciseData { type = ExerciseType.Cardio, time = 0 };
         _exerciseRepo.Add(data);
         float currentScore = PersistentDataModel.ReadScore();
-        float addScore = RewardSystem.GetExerciseReward(data);
+        float addScore = _rewardSystem.GetExerciseReward(data);
         PersistentDataModel.SaveNewScore(currentScore + addScore);
         FunctionEventBus.UserScoreAdded?.Invoke(addScore);
     }
@@ -76,7 +76,7 @@ public class UserActionModel : MonoBehaviour
     {
         _exerciseRepo.Add(data);
         float currentScore = PersistentDataModel.ReadScore();
-        float addScore = RewardSystem.GetExerciseReward(data);
+        float addScore = _rewardSystem.GetExerciseReward(data);
         PersistentDataModel.SaveNewScore(currentScore + addScore);
         FunctionEventBus.UserScoreAdded?.Invoke(addScore);
     }
