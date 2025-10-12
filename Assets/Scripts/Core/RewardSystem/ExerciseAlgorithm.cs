@@ -5,10 +5,19 @@
 public static class ExerciseAlgorithm
 {
     // Note: when the time is over 1 hour, reduce the multiplier to 1
-    private const float normalMultiplier = 2f;
-    private const float reducedMultiplier = 1f;
+    private const float _normalMultiplier = 2f;
+    private const float _reducedMultiplier = 1f;
 
-    public static float CalculateScore(ExerciseData data)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="data"></param>
+    /// <param name="normalMultiplier"></param>
+    /// <param name="reducedMultiplier"></param>
+    /// <returns></returns>
+    public static float CalculateScore(ExerciseData data, 
+        float normalMultiplier, 
+        float reducedMultiplier)
     {
         if (data == null)
         {

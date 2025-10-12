@@ -16,7 +16,11 @@ public static class PersistentDataModel
 
     public static float ReadScore()
     {
-        return PlayerPrefs.GetFloat(SCORE_KEY);
+        return PlayerPrefs.GetFloat(SCORE_KEY, 0f);
     }
-
+    
+    public static void ResetScore()
+    {
+        PlayerPrefs.DeleteKey(SCORE_KEY);
+    }
 }

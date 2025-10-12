@@ -1,19 +1,29 @@
-using UnityEngine;
+using Zenject;
 
-public static class RewardSystem
+public class RewardSystem : IRewardSystem
 {
-    public static float GetGamingReward(GamingData gamingData)
+    private IRewardParameters _rewardParameters;
+    
+    public RewardSystem(IRewardParameters rewardParameters)
     {
-        return GamingAlgorithm.CalculateScore(gamingData);
+        _rewardParameters = rewardParameters;
+    }
+    
+    public float GetGamingReward(GamingData gamingData)
+    {
+        return GamingAlgorithm.CalculateScore(gamingData, 
+            _rewardParameters.GamingMultiplier, _rewardParameters.GamingReducedMultiplier);
     }
 
-    public static float GetEatingReward(EatingData eatingData)
+    public float GetEatingReward(EatingData eatingData)
     {
-        return EatingAlogorithm.CalculateScore(eatingData);
+        return EatingAlogorithm.CalculateScore(eatingData, 
+            _rewardParameters.EatingModifer, _rewardParameters.BreakfastModifer);
     }
 
-    public static float GetExerciseReward(ExerciseData exerciseData)
+    public float GetExerciseReward(ExerciseData exerciseData)
     {
-        return ExerciseAlgorithm.CalculateScore(exerciseData);
+        return ExerciseAlgorithm.CalculateScore(exerciseData, 
+            _rewardParameters.ExerciseMultiplier, _rewardParameters.ExerciseReducedMultiplier);
     }
 }
