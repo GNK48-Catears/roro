@@ -1,18 +1,21 @@
 using UnityEngine;
+using Zenject;
 
 public class UserActionModel : MonoBehaviour
 {
-    private JsonFileRepository<GamingData> _gamingRepo;
-    private JsonFileRepository<EatingData> _eatingRepo;
-    private JsonFileRepository<ExerciseData> _exerciseRepo;
+    [Inject] private JsonFileRepository<GamingData> _gamingRepo;
+    [Inject] private JsonFileRepository<EatingData> _eatingRepo;
+    [Inject] private JsonFileRepository<ExerciseData> _exerciseRepo;
 
     [SerializeField] private bool deleteDataOnLaunchMode = false;
 
     void Awake()
     {
+        /*
         _gamingRepo = new JsonFileRepository<GamingData>();
         _eatingRepo = new JsonFileRepository<EatingData>();
         _exerciseRepo = new JsonFileRepository<ExerciseData>();
+        */
         if (deleteDataOnLaunchMode)
         {
             _eatingRepo.DeleteRepository();
