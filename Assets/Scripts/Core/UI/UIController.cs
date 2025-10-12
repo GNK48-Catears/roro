@@ -49,14 +49,18 @@ public class UIController : MonoBehaviour
     }
     void OnEnable()
     {   
-        plusButton.onClick.AddListener(() => { ShowPanel(selectCategoryPanel); AudioManager.Instance.PlayOneShot("pew", 0.5f); });
+        plusButton.onClick.AddListener(() => {PlanetAnim.Instance.FirstClick(); HideAllPanels(); AudioManager.Instance.PlayOneShot("pew", 0.5f); });
         gamingButton.onClick.AddListener(() => OnCategoryButtonClicked(CategoryType.Gaming));
         exerciseButton.onClick.AddListener(() => OnCategoryButtonClicked(CategoryType.Exercise));
         eatingButton.onClick.AddListener(() => OnCategoryButtonClicked(CategoryType.Eating));
         confirmButton.onClick.AddListener(OnConfirmClicked);
-        closeButton.onClick.AddListener(() => { Reset(); });
+        closeButton.onClick.AddListener(() => {PlanetAnim.Instance.FinishReport(); HideAllPanels();});
         FunctionEventBus.UserScoreAdded += (score) => SetScoreEarned(score);
         FunctionEventBus.UserScoreUpdated += (score) => SetTotalScore(score);
+
+        if (PlanetAnim.Instance != null)
+            PlanetAnim.Instance.OnPlusClickComplete += () => { ShowPanel(selectCategoryPanel); };
+            PlanetAnim.Instance.OnReportFinish += () => { Reset(); };
     }
 
     void OnDisable()
@@ -174,6 +178,16 @@ public class UIController : MonoBehaviour
 
         if (panel == gamingPanel || panel == exercisePanel || panel == eatingPanel)
             confirmButton.gameObject.SetActive(true);
+    }
+
+    private void HideAllPanels()
+    {
+        startPanel.SetActive(false);
+        selectCategoryPanel.SetActive(false);
+        gamingPanel.SetActive(false);
+        exercisePanel.SetActive(false);
+        eatingPanel.SetActive(false);
+        resultPanel.SetActive(false);
     }
 
     private void SetScoreEarned(float score)
