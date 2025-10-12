@@ -2,15 +2,24 @@ using UnityEngine;
 
 public class UserActionModel : MonoBehaviour
 {
-    private PlayerPrefsRepository<GamingData> _gamingRepo;
-    private PlayerPrefsRepository<EatingData> _eatingRepo;
-    private PlayerPrefsRepository<ExerciseData> _exerciseRepo;
+    private JsonFileRepository<GamingData> _gamingRepo;
+    private JsonFileRepository<EatingData> _eatingRepo;
+    private JsonFileRepository<ExerciseData> _exerciseRepo;
+
+    [SerializeField] private bool deleteDataOnLaunchMode = false;
 
     void Awake()
     {
-        _gamingRepo = new PlayerPrefsRepository<GamingData>();
-        _eatingRepo = new PlayerPrefsRepository<EatingData>();
-        _exerciseRepo = new PlayerPrefsRepository<ExerciseData>();
+        _gamingRepo = new JsonFileRepository<GamingData>();
+        _eatingRepo = new JsonFileRepository<EatingData>();
+        _exerciseRepo = new JsonFileRepository<ExerciseData>();
+        if (deleteDataOnLaunchMode)
+        {
+            _eatingRepo.DeleteRepository();
+            _exerciseRepo.DeleteRepository();
+            _gamingRepo.DeleteRepository();
+            PersistentDataModel.ResetScore();
+        }
     }
 
     public void AddGamingData(string ntype = "Unknown", int ntime = 0)
