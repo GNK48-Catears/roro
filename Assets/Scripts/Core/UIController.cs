@@ -7,10 +7,16 @@ public class UIController : MonoBehaviour
 {
     [Header("Panels")]
     [SerializeField] private GameObject startPanel;
+    [SerializeField] private GameObject subPanel;
     [SerializeField] private GameObject selectCategoryPanel;
     [SerializeField] private GameObject gamingPanel;
     [SerializeField] private GameObject exercisePanel;
     [SerializeField] private GameObject eatingPanel;
+
+    [Header("Start Panel")]
+    [SerializeField] private Button plusButton;
+    [SerializeField] private TextMeshProUGUI totalScoreTextStart;
+
     [Header("Result Panel")]
     [SerializeField] private GameObject resultPanel;
     [SerializeField] private TextMeshProUGUI scoreEarnedText;
@@ -42,12 +48,13 @@ public class UIController : MonoBehaviour
         Setup();
     }
     void OnEnable()
-    {
+    {   
+        plusButton.onClick.AddListener(() => { ShowPanel(selectCategoryPanel); AudioManager.Instance.PlayOneShot("pew", 0.5f); });
         gamingButton.onClick.AddListener(() => OnCategoryButtonClicked(CategoryType.Gaming));
         exerciseButton.onClick.AddListener(() => OnCategoryButtonClicked(CategoryType.Exercise));
         eatingButton.onClick.AddListener(() => OnCategoryButtonClicked(CategoryType.Eating));
         confirmButton.onClick.AddListener(OnConfirmClicked);
-        closeButton.onClick.AddListener(Reset);
+        closeButton.onClick.AddListener(() => { Reset(); });
         FunctionEventBus.UserScoreAdded += (score) => SetScoreEarned(score);
         FunctionEventBus.UserScoreUpdated += (score) => SetTotalScore(score);
     }
@@ -74,6 +81,7 @@ public class UIController : MonoBehaviour
             _ => selectCategoryPanel
         });
         confirmButton.gameObject.SetActive(true);
+        AudioManager.Instance.PlayOneShot("pew", 0.5f);
     }
 
     void OnConfirmClicked()
@@ -106,7 +114,9 @@ public class UIController : MonoBehaviour
         if (recordData != null)
         {
             UIEventBus.RecordSubmitted?.Invoke(recordData);
+            confirmButton.gameObject.SetActive(false);
             ShowPanel(resultPanel);
+            AudioManager.Instance.PlayOneShot("rizz", 0.8f);
         }
     }
 
@@ -134,6 +144,8 @@ public class UIController : MonoBehaviour
         DropDownEnumBinder.BindEnumToDropdown<MealType>(mealTypeDropdown);
         DropDownEnumBinder.BindEnumToDropdown<FoodType>(foodTypeDropdown);
         DropDownEnumBinder.BindEnumToDropdown<ExerciseType>(exerciseTypeDropdown);
+        if (subPanel != null)
+            subPanel.SetActive(true);
         Reset();
     }
 
@@ -174,6 +186,8 @@ public class UIController : MonoBehaviour
     {
         if (totalScoreText != null)
             totalScoreText.text = $"Total Score: {score}";
+        if (totalScoreTextStart != null)
+            totalScoreTextStart.text = $"Total Score: {score}";
     }
 
 }
